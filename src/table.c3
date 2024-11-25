@@ -34,7 +34,7 @@ fn void freeTable(Table* table) {
 }
 
 fn Entry* findEntry(Entry* entries, int capacity, ObjString* key) {
-  uint index = key.hash % (uint)capacity;
+  uint index = key.hash & (capacity - 1);
   Entry* tombstone = null;
   for (;;) {
     Entry* entry = &entries[index];
@@ -50,7 +50,7 @@ fn Entry* findEntry(Entry* entries, int capacity, ObjString* key) {
       // We found the key.
       return entry;
     }
-    index = (index + 1) % (uint) capacity;
+    index = (index + 1) & (capacity - 1);
   }
 }
 
@@ -126,7 +126,7 @@ fn void tableAddAll(Table* from, Table* to) {
 fn ObjString* tableFindString(Table* table, char* chars, int length, uint hash) {
   if (table.count == 0) return null;
 
-  uint index = hash % (uint) table.capacity;
+  uint index = hash & (table.capacity - 1);
   for (;;) {
     Entry* entry = &table.entries[index];
     if (entry.key == null) {
@@ -138,7 +138,7 @@ fn ObjString* tableFindString(Table* table, char* chars, int length, uint hash) 
       return entry.key;
     }
 
-    index = (index + 1) % (uint) table.capacity;
+    index = (index + 1) & (table.capacity - 1);
   }
 }
 
