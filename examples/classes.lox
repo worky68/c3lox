@@ -1,0 +1,25 @@
+class Scone {
+  init(name) {
+    this.name = name;
+  }
+
+  topping(first, second) {
+    print "scone with " + first + " and " + second + " for " + this.name;
+  }
+}
+
+var scone = Scone("Bob");
+scone.topping("berries", "cream"); // prints scone with berries and cream for Bob
+
+class Oops {
+  init() {
+    fun f() {
+      print "not a method";
+    }
+
+    this.field = f;
+  }
+}
+
+var oops = Oops();
+oops.field();

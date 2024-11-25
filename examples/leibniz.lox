@@ -1,0 +1,16 @@
+var start = clock();
+
+var rounds = 100000002;
+var pi = 1;
+var x = 1;
+
+for(var i = 2; i < rounds; i = i + 1) {
+  x = -x;
+  pi = pi + (x / (2 * i - 1));
+}
+
+pi = pi * 4;
+
+print pi;
+
+print clock() - start;
