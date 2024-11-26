@@ -30,8 +30,7 @@
       // and overrides of global settings here.
       "opt": "O3",
       "debug-info": "none",
-      // "cflags-add": "-flto -ffast-math",
-      // "fp-math": "fast"
+      "features": [] // Add "NAN_BOXING" enable NAN Boxing optimization
 
     },
     "loxd": {
