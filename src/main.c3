@@ -2,15 +2,16 @@ module lox;
 
 import std::io;
 import std::core::mem;
+import libc;
 
 import vm;
 
-fn void repl() {
+fn void! repl() {
 
   for(;;) {
     @pool() {
       io::printf("> ");
-      String line = io::treadline()!!; // TODO handle errors gracefully
+      String line = io::treadline()!;
 
       if(line == "exit") {
         return;
@@ -27,7 +28,11 @@ fn void repl() {
 
 fn int runFile(String file) {
   @pool() {
-    String source = readFile(file)!!; // TODO handle errors gracefully
+    String! source = readFile(file);
+    if(anyfault err = @catch(source)) {
+      io::fprintfn(io::stderr(), "lox: can't read file '%s'\n[Errno %d] %s", file, libc::errno(), err)!!; 
+      return 1;
+    }
 
     if(catch err = vm::interpret(source)) {
       case InterpretError.COMPILE_ERROR: return 65;
@@ -39,6 +44,12 @@ fn int runFile(String file) {
 }
 
 fn String! readFile(String filename) {
+
+  if(!file::is_file(filename)) {
+    libc::errno_set(errno::EISDIR);
+    return IoError.FILE_IS_DIR?;
+  }
+
   File file = file::open(filename, "rb")!;
   defer (void)file.close();
   usz len = file.seek(0, END)! + 1;
@@ -59,13 +70,16 @@ fn int main(String[] args) {
   defer vm::freeVm();
 
   if(args.len == 1) {
-    repl();
+    if(catch err = repl()) {
+      io::fprintfn(io::stderr(), "lox: failed to read input\n[Errno %d] %s", libc::errno(), err)!!; 
+      return 1;
+    }
   } 
   else if(args.len == 2) {
     return runFile(args[1]);
   } 
   else {
-    io::fprintf(io::stderr(), "Usage: lox [path]\n")!!;
+    io::fprintfn(io::stderr(), "Usage: lox [path]")!!;
     return 64;
   }
 
