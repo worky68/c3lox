@@ -4,9 +4,6 @@ import std::io;
 import std::core::mem;
 
 import vm;
-import chunk;
-import value;
-import debug;
 
 fn void repl() {
 
@@ -29,10 +26,8 @@ fn void repl() {
 }
 
 fn int runFile(String file) {
-
   @pool() {
-    String source = (String) file::load_temp(file)!!; // TODO handle errors gracefully
-    // defer source.free();
+    String source = readFile(file)!!; // TODO handle errors gracefully
 
     if(catch err = vm::interpret(source)) {
       case InterpretError.COMPILE_ERROR: return 65;
@@ -40,8 +35,23 @@ fn int runFile(String file) {
       default: return 1;
     }
   };
-
   return 0;
+}
+
+fn String! readFile(String filename) {
+  File file = file::open(filename, "rb")!;
+  defer (void)file.close();
+  usz len = file.seek(0, END)! + 1;
+  file.seek(0, SET)!;
+  char* data = allocator::malloc_try(allocator::temp(), len)!;
+  defer catch allocator::free(allocator::temp(), data);
+  usz read = 0;
+  while (read < len - 1)
+  {
+    read += file.read(data[read:len - read])!;
+  }
+  data[len - 1] = '\0';
+  return (String) data[:len];
 }
 
 fn int main(String[] args) {
