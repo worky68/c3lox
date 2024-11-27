@@ -13,6 +13,10 @@ fn void! repl() {
       io::printf("> ");
       String line = io::treadline()!;
 
+      if(line == "") {
+        continue;
+      }
+
       if(line == "exit") {
         return;
       }

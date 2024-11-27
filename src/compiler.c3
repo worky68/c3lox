@@ -9,9 +9,6 @@ import common;
 import memory;
 import debug;
 
-// [x] investigate using String instead of char*
-
-const UINT16_MAX = 65535;
 const UINT8_COUNT = 256;
 
 struct Parser {
@@ -176,7 +173,7 @@ fn void emitLoop(int loopStart) {
   emitByte((char) OpCode.OP_LOOP);
 
   int offset = currentChunk().count - loopStart + 2;
-  if (offset > UINT16_MAX) error("Loop body too large.");
+  if (offset > common::UINT16_MAX) error("Loop body too large.");
 
   emitByte((char) (offset >> 8) & 0xff);
   emitByte((char) offset & 0xff);
@@ -217,7 +214,7 @@ fn void patchJump(int offset) {
   // -2 to adjust for the bytecode for the jump offset itself.
   int jump = currentChunk().count - offset - 2;
 
-  if (jump > UINT16_MAX) {
+  if (jump > common::UINT16_MAX) {
     error("Too much code to jump over.");
   }
 
