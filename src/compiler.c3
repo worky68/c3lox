@@ -244,8 +244,6 @@ fn void endScope() {
   current.scopeDepth--;
 
   while (current.localCount > 0 && current.locals[current.localCount - 1].depth > current.scopeDepth) {
-    emitByte((char) OpCode.OP_POP);
-
     if (current.locals[current.localCount - 1].isCaptured) {
       emitByte((char) OpCode.OP_CLOSE_UPVALUE);
     } else {
