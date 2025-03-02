@@ -25,6 +25,12 @@ $ c3c build loxd
 This produces the enables debug information as well as debug feature flags 
 ```DEBUG_PRINT_CODE``` and ```DEBUG_TRACE_EXECUTION``` enabled. These assist in debugging the VM instructions during execution and are implemented in the book. There are also feature flags ```DEBUG_LOG_GC``` and ```DEBUG_STRESS_GC```to debug the garbage collector from the book available that can be added in the ```project.json``` file used by the C3 compiler.
 
+### Test
+
+```bash
+$ c3c test --test-noleak
+```
+
 ### Using
 
 Pass a lox file to the executable.

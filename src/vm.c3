@@ -5,6 +5,7 @@ import libc;
 
 import compiler;
 import chunk;
+import opcode;
 import value;
 import object;
 import table;
@@ -99,7 +100,7 @@ fn void runtimeError(String format, args...) {
 }
 
 fn void defineNative(String name, NativeFn function) {
-  push(value::obj_val(object::copyString(name, (int)libc::strlen((ZString) name)))); // TODO string length in c3
+  push(value::obj_val(object::copyString(name, name.len)));
   push(value::obj_val(object::newNative(function)));
   table::tableSet(&vm.globals, object::as_string(vm.stack[0]), vm.stack[1]);
   pop();
@@ -290,7 +291,7 @@ fn void! run() {
       debug::disassembleInstruction(&frame.closure.function.chunk, (int)(frame.ip - frame.closure.function.chunk.code));
     $endif
     OpCode instruction;
-    switch (instruction = (chunk::OpCode) read_byte(frame)) {
+    switch (instruction = opcode::from(read_byte(frame))) {
       case OP_CONSTANT: {
         Value constant = read_constant(frame);
         push(constant);

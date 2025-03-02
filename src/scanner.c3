@@ -14,7 +14,7 @@ struct Token {
   int line;
 }
 
-enum TokenType : char {
+enum TokenType : inline char {
   // Single-character tokens.
   TOKEN_LEFT_PAREN, TOKEN_RIGHT_PAREN,
   TOKEN_LEFT_BRACE, TOKEN_RIGHT_BRACE,

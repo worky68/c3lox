@@ -2,6 +2,7 @@ module debug;
 
 import std::io;
 import chunk;
+import opcode;
 import value;
 import object;
 
@@ -59,7 +60,7 @@ fn int disassembleInstruction(Chunk* chunk, int offset) {
     io::printf("%d ", chunk.lines[offset]);
   }
 
-  OpCode instruction = (OpCode) chunk.code[offset];
+  OpCode instruction = opcode::from(chunk.code[offset]);
   switch (instruction) {
     case OP_CONSTANT:
       return constantInstruction("OP_CONSTANT", chunk, offset);

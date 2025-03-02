@@ -5,6 +5,7 @@ import scanner;
 import value;
 import object;
 import chunk;
+import opcode;
 import common;
 import memory;
 import debug;
@@ -170,7 +171,7 @@ fn void emitBytes(char byte1, char byte2) {
 }
 
 fn void emitLoop(int loopStart) {
-  emitByte((char) OpCode.OP_LOOP);
+  emitByte(OpCode.OP_LOOP);
 
   int offset = currentChunk().count - loopStart + 2;
   if (offset > common::UINT16_MAX) error("Loop body too large.");
@@ -188,12 +189,12 @@ fn int emitJump(char instruction) {
 
 fn void emitReturn() {
   if (current.type == TYPE_INITIALIZER) {
-    emitBytes((char) OpCode.OP_GET_LOCAL, 0);
+    emitBytes(OpCode.OP_GET_LOCAL, 0);
   } else {
-    emitByte((char) OpCode.OP_NIL);
+    emitByte(OpCode.OP_NIL);
   }
 
-  emitByte((char) OpCode.OP_RETURN);
+  emitByte(OpCode.OP_RETURN);
 }
 
 fn char makeConstant(Value value) {
@@ -207,7 +208,7 @@ fn char makeConstant(Value value) {
 }
 
 fn void emitConstant(Value value) {
-  emitBytes((char) OpCode.OP_CONSTANT, makeConstant(value));
+  emitBytes(OpCode.OP_CONSTANT, makeConstant(value));
 }
 
 fn void patchJump(int offset) {
@@ -228,7 +229,7 @@ fn ObjFunction* endCompiler() {
 
   $if $feature(DEBUG_PRINT_CODE):
     if (!parser.hadError) {
-    debug::disassembleChunk(currentChunk(), function.name != null ? function.name.chars : "<script>");
+      debug::disassembleChunk(currentChunk(), function.name != null ? function.name.chars : "<script>");
     }
   $endif
 
@@ -284,21 +285,21 @@ fn void dot(bool canAssign) {
 
   if (canAssign && match(TokenType.TOKEN_EQUAL)) {
     expression();
-    emitBytes((char) OpCode.OP_SET_PROPERTY, name);
+    emitBytes(OpCode.OP_SET_PROPERTY, name);
   } else if (match(TOKEN_LEFT_PAREN)) {
     char argCount = argumentList();
-    emitBytes((char) OpCode.OP_INVOKE, name);
+    emitBytes(OpCode.OP_INVOKE, name);
     emitByte(argCount);
   } else {
-    emitBytes((char) OpCode.OP_GET_PROPERTY, name);
+    emitBytes(OpCode.OP_GET_PROPERTY, name);
   }
 }
 
 fn void literal(bool canAssign) {
   switch (parser.previous.type) {
-    case TOKEN_FALSE: emitByte((char) OpCode.OP_FALSE);
-    case TOKEN_NIL: emitByte((char) OpCode.OP_NIL);
-    case TOKEN_TRUE: emitByte((char) OpCode.OP_TRUE);
+    case TOKEN_FALSE: emitByte(OpCode.OP_FALSE);
+    case TOKEN_NIL: emitByte(OpCode.OP_NIL);
+    case TOKEN_TRUE: emitByte(OpCode.OP_TRUE);
     default: return; // Unreachable.
   }
 }
@@ -321,15 +322,15 @@ fn void namedVariable(Token name, bool canAssign) {
   char getOp, setOp;
   int arg = resolveLocal(current, &name);
   if (arg != -1) {
-    getOp = (char) OpCode.OP_GET_LOCAL;
-    setOp = (char) OpCode.OP_SET_LOCAL;
+    getOp = OpCode.OP_GET_LOCAL;
+    setOp = OpCode.OP_SET_LOCAL;
   } else if ((arg = resolveUpvalue(current, &name)) != -1) {
-    getOp = (char) OpCode.OP_GET_UPVALUE;
-    setOp = (char) OpCode.OP_SET_UPVALUE;
+    getOp = OpCode.OP_GET_UPVALUE;
+    setOp = OpCode.OP_SET_UPVALUE;
   } else {
     arg = identifierConstant(&name);
-    getOp = (char) OpCode.OP_GET_GLOBAL;
-    setOp = (char) OpCode.OP_SET_GLOBAL;
+    getOp = OpCode.OP_GET_GLOBAL;
+    setOp = OpCode.OP_SET_GLOBAL;
   }
 
   if (canAssign && match(TokenType.TOKEN_EQUAL)) {
@@ -366,11 +367,11 @@ fn void super(bool canAssign) {
   if (match(TokenType.TOKEN_LEFT_PAREN)) {
     char argCount = argumentList();
     namedVariable(syntheticToken("super"), false);
-    emitBytes((char) OpCode.OP_SUPER_INVOKE, name);
+    emitBytes(OpCode.OP_SUPER_INVOKE, name);
     emitByte(argCount);
   } else {
     namedVariable(syntheticToken("super"), false);
-    emitBytes((char) OpCode.OP_GET_SUPER, name);
+    emitBytes(OpCode.OP_GET_SUPER, name);
   }
 }
 
@@ -390,8 +391,8 @@ fn void unary(bool canAssign) {
 
   // Emit the operator instruction.
   switch (operatorType) {
-    case TOKEN_BANG: emitByte((char) OpCode.OP_NOT);
-    case TOKEN_MINUS: emitByte((char) OpCode.OP_NEGATE);
+    case TOKEN_BANG: emitByte(OpCode.OP_NOT);
+    case TOKEN_MINUS: emitByte(OpCode.OP_NEGATE);
     default: return; // Unreachable.
   }
 }
@@ -526,7 +527,7 @@ fn void defineVariable(char global) {
     return;
   }
 
-  emitBytes((char) OpCode.OP_DEFINE_GLOBAL, global);
+  emitBytes(OpCode.OP_DEFINE_GLOBAL, global);
 }
 
 fn char argumentList() {
@@ -545,20 +546,20 @@ fn char argumentList() {
 }
 
 fn void and(bool canAssign) {
-  int endJump = emitJump((char) OpCode.OP_JUMP_IF_FALSE);
+  int endJump = emitJump(OpCode.OP_JUMP_IF_FALSE);
 
-  emitByte((char) OpCode.OP_POP);
+  emitByte(OpCode.OP_POP);
   parsePrecedence(PREC_AND);
 
   patchJump(endJump);
 }
 
 fn void or(bool canAssign) {
-  int elseJump = emitJump((char) OpCode.OP_JUMP_IF_FALSE);
-  int endJump = emitJump((char) OpCode.OP_JUMP);
+  int elseJump = emitJump(OpCode.OP_JUMP_IF_FALSE);
+  int endJump = emitJump(OpCode.OP_JUMP);
 
   patchJump(elseJump);
-  emitByte((char) OpCode.OP_POP);
+  emitByte(OpCode.OP_POP);
 
   parsePrecedence(PREC_OR);
   patchJump(endJump);
@@ -643,7 +644,7 @@ fn void function(FunctionType type) {
   block();
 
   ObjFunction* function = endCompiler();
-  emitBytes((char) OpCode.OP_CLOSURE, makeConstant(value::obj_val(function)));
+  emitBytes(OpCode.OP_CLOSURE, makeConstant(value::obj_val(function)));
 
   for (int i = 0; i < function.upvalueCount; i++) {
     emitByte(compiler.upvalues[i].isLocal ? 1 : 0);
@@ -660,7 +661,7 @@ fn void method() {
     type = TYPE_INITIALIZER;
   }
   function(type);
-  emitBytes((char) OpCode.OP_METHOD, constant);
+  emitBytes(OpCode.OP_METHOD, constant);
 }
 
 fn void classDeclaration() {
@@ -669,7 +670,7 @@ fn void classDeclaration() {
   char nameConstant = identifierConstant(&parser.previous);
   declareVariable();
 
-  emitBytes((char) OpCode.OP_CLASS, nameConstant);
+  emitBytes(OpCode.OP_CLASS, nameConstant);
   defineVariable(nameConstant);
 
   ClassCompiler classCompiler;
@@ -690,7 +691,7 @@ fn void classDeclaration() {
     defineVariable(0);
 
     namedVariable(className, false);
-    emitByte((char) OpCode.OP_INHERIT);
+    emitByte(OpCode.OP_INHERIT);
     classCompiler.hasSuperclass = true;
   }
 
@@ -700,7 +701,7 @@ fn void classDeclaration() {
     method();
   }
   consume(TokenType.TOKEN_RIGHT_BRACE, "Expect '}' after class body.");
-  emitByte((char) OpCode.OP_POP);
+  emitByte(OpCode.OP_POP);
 
   if (classCompiler.hasSuperclass) {
     endScope();
@@ -722,7 +723,7 @@ fn void varDeclaration() {
   if (match(TokenType.TOKEN_EQUAL)) {
     expression();
   } else {
-    emitByte((char) OpCode.OP_NIL);
+    emitByte(OpCode.OP_NIL);
   }
   consume(TokenType.TOKEN_SEMICOLON, "Expect ';' after variable declaration.");
 
@@ -732,7 +733,7 @@ fn void varDeclaration() {
 fn void expressionStatement() {
   expression();
   consume(TOKEN_SEMICOLON, "Expect ';' after expression.");
-  emitByte((char) OpCode.OP_POP);
+  emitByte(OpCode.OP_POP);
 }
 
 fn void forStatement() {
@@ -753,15 +754,15 @@ fn void forStatement() {
     consume(TokenType.TOKEN_SEMICOLON, "Expect ';' after loop condition.");
 
     // Jump out of the loop if the condition is false.
-    exitJump = emitJump((char) OpCode.OP_JUMP_IF_FALSE);
-    emitByte((char) OpCode.OP_POP); // Condition.
+    exitJump = emitJump(OpCode.OP_JUMP_IF_FALSE);
+    emitByte(OpCode.OP_POP); // Condition.
   }
 
   if (!match(TokenType.TOKEN_RIGHT_PAREN)) {
-    int bodyJump = emitJump((char) OpCode.OP_JUMP);
+    int bodyJump = emitJump(OpCode.OP_JUMP);
     int incrementStart = currentChunk().count;
     expression();
-    emitByte((char) OpCode.OP_POP);
+    emitByte(OpCode.OP_POP);
     consume(TokenType.TOKEN_RIGHT_PAREN, "Expect ')' after for clauses.");
 
     emitLoop(loopStart);
@@ -774,7 +775,7 @@ fn void forStatement() {
 
   if (exitJump != -1) {
     patchJump(exitJump);
-    emitByte((char) OpCode.OP_POP); // Condition.
+    emitByte(OpCode.OP_POP); // Condition.
   }
 
   endScope();
@@ -785,14 +786,14 @@ fn void ifStatement() {
   expression();
   consume(TokenType.TOKEN_RIGHT_PAREN, "Expect ')' after condition."); 
 
-  int thenJump = emitJump((char) OpCode.OP_JUMP_IF_FALSE);
-  emitByte((char) OpCode.OP_POP);
+  int thenJump = emitJump(OpCode.OP_JUMP_IF_FALSE);
+  emitByte(OpCode.OP_POP);
   statement();
 
-  int elseJump = emitJump((char) OpCode.OP_JUMP);
+  int elseJump = emitJump(OpCode.OP_JUMP);
 
   patchJump(thenJump);
-  emitByte((char) OpCode.OP_POP);
+  emitByte(OpCode.OP_POP);
 
   if (match(TokenType.TOKEN_ELSE)) statement();
   patchJump(elseJump);
@@ -801,7 +802,7 @@ fn void ifStatement() {
 fn void printStatement() {
   expression();
   consume(TokenType.TOKEN_SEMICOLON, "Expect ';' after value.");
-  emitByte((char) OpCode.OP_PRINT);
+  emitByte(OpCode.OP_PRINT);
 }
 
 fn void returnStatement() {
@@ -818,7 +819,7 @@ fn void returnStatement() {
     
     expression();
     consume(TokenType.TOKEN_SEMICOLON, "Expect ';' after return value.");
-    emitByte((char) OpCode.OP_RETURN);
+    emitByte(OpCode.OP_RETURN);
   }
 }
 
@@ -828,13 +829,13 @@ fn void whileStatement() {
   expression();
   consume(TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
 
-  int exitJump = emitJump((char) OpCode.OP_JUMP_IF_FALSE);
-  emitByte((char) OpCode.OP_POP);
+  int exitJump = emitJump(OpCode.OP_JUMP_IF_FALSE);
+  emitByte(OpCode.OP_POP);
   statement();
   emitLoop(loopStart);
 
   patchJump(exitJump);
-  emitByte((char) OpCode.OP_POP);
+  emitByte(OpCode.OP_POP);
 }
 
 fn void synchronize() {
@@ -904,7 +905,7 @@ fn ObjFunction* compile(String source) {
 
   advance();
 
-  while (!match(TOKEN_EOF)) {
+  while (!match(TokenType.TOKEN_EOF)) {
     declaration();
   }
 
