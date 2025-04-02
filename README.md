@@ -46,7 +46,9 @@ $ ./build/lox
 To leave the REPL type ```exit```
 
 ```bash
-./build/lox
+$ ./build/lox
+> print "Hello World";
+Hello World
 > exit
 ```
 

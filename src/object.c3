@@ -23,7 +23,7 @@ struct ObjFunction {
   ObjString* name;
 }
 
-def NativeFn = fn Value (int argCount, Value* args);
+alias NativeFn = fn Value (int argCount, Value* args);
 
 struct ObjNative {
   Obj obj;

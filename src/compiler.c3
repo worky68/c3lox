@@ -33,7 +33,7 @@ enum Precedence {
   PREC_PRIMARY
 }
 
-def ParseFn = fn void(bool canAssign); 
+alias ParseFn = fn void(bool canAssign); 
 
 struct ParseRule {
   ParseFn prefix;

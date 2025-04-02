@@ -6,7 +6,7 @@ import libc;
 
 import vm;
 
-fn void! repl() {
+fn void? repl() {
 
   for(;;) {
     @pool() {
@@ -22,9 +22,11 @@ fn void! repl() {
       }
 
       if(catch err = vm::interpret(line)) {
-        case InterpretError.COMPILE_ERROR:
-        case InterpretError.RUNTIME_ERROR:
-        default: continue;
+        switch(err) {
+          case vm::COMPILE_ERROR:
+          case vm::RUNTIME_ERROR:
+          default: continue;
+        }
       }
     };
   }
@@ -32,26 +34,28 @@ fn void! repl() {
 
 fn int runFile(String file) {
   @pool() {
-    String! source = readFile(file);
-    if(anyfault err = @catch(source)) {
+    String? source = readFile(file);
+    if(fault err = @catch(source)) {
       io::fprintfn(io::stderr(), "lox: can't read file '%s'\n[Errno %d] %s", file, libc::errno(), err)!!; 
       return 1;
     }
 
     if(catch err = vm::interpret(source)) {
-      case InterpretError.COMPILE_ERROR: return 65;
-      case InterpretError.RUNTIME_ERROR: return 70;
-      default: return 1;
+      switch(err) {
+        case vm::COMPILE_ERROR: return 65;
+        case vm::RUNTIME_ERROR: return 70;
+        default: return 1;
+      }
     }
   };
   return 0;
 }
 
-fn String! readFile(String filename) {
+fn String? readFile(String filename) {
 
   if(!file::is_file(filename)) {
     libc::errno_set(errno::EISDIR);
-    return IoError.FILE_IS_DIR?;
+    return io::FILE_IS_DIR?;
   }
 
   File file = file::open(filename, "rb")!;

@@ -50,7 +50,7 @@ const NIL_VAL   = (Value)(ulong)(QNAN | TAG_NIL);
 const FALSE_VAL = (Value)(ulong)(QNAN | TAG_FALSE);
 const TRUE_VAL  = (Value)(ulong)(QNAN | TAG_TRUE);
 
-def Value = ulong;
+alias Value = ulong;
 
 macro nil_val() {
   return (Value)(ulong)(QNAN | TAG_NIL);
@@ -178,19 +178,31 @@ macro as_obj(Value value) {
 }
 
 macro Value bool_val(value) {
-  return (Value) Value{VAL_BOOL, {.boolean = (bool) value}}; 
+  Value val;
+  val.type = VAL_BOOL;
+  val.as.boolean = (bool) value;
+  return val; 
 }
 
 macro Value nil_val() {
-  return (Value) Value{VAL_NIL, {.number = 0}}; 
+  Value val;
+  val.type = VAL_NIL;
+  val.as.number = 0;
+  return val;
 }
 
 macro Value number_val(value) {
-  return (Value) Value{VAL_NUMBER, {.number = (double) value}}; 
+  Value val;
+  val.type = VAL_NUMBER;
+  val.as.number = (double) value;
+  return val; 
 }
 
 macro Value obj_val(value) {
-  return (Value) Value{VAL_OBJ, {.obj = (Obj*) value}}; 
+  Value val;
+  val.type = VAL_OBJ;
+  val.as.obj = (Obj*) value;
+  return val; 
 }
 
 fn void printValue(Value value) {
