@@ -36,7 +36,7 @@ fn int runFile(String file) {
   @pool() {
     String? source = readFile(file);
     if(fault err = @catch(source)) {
-      io::fprintfn(io::stderr(), "lox: can't read file '%s'\n[Errno %d] %s", file, libc::errno(), err)!!; 
+      io::fprintfn(io::stderr(), "lox: can't read file '%s'\n[Errno %d] %s", file, libc::errno(), err)!!;
       return 1;
     }
 
@@ -62,8 +62,8 @@ fn String? readFile(String filename) {
   defer (void)file.close();
   usz len = file.seek(0, END)! + 1;
   file.seek(0, SET)!;
-  char* data = allocator::malloc_try(allocator::temp(), len)!;
-  defer catch allocator::free(allocator::temp(), data);
+  char* data = allocator::malloc_try(allocator::tmem, len)!;
+  defer catch allocator::free(allocator::tmem, data);
   usz read = 0;
   while (read < len - 1)
   {
@@ -79,13 +79,13 @@ fn int main(String[] args) {
 
   if(args.len == 1) {
     if(catch err = repl()) {
-      io::fprintfn(io::stderr(), "lox: failed to read input\n[Errno %d] %s", libc::errno(), err)!!; 
+      io::fprintfn(io::stderr(), "lox: failed to read input\n[Errno %d] %s", libc::errno(), err)!!;
       return 1;
     }
-  } 
+  }
   else if(args.len == 2) {
     return runFile(args[1]);
-  } 
+  }
   else {
     io::fprintfn(io::stderr(), "Usage: lox [path]")!!;
     return 64;

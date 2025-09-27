@@ -50,7 +50,7 @@ fn void* reallocate(void* pointer, usz oldSize, usz newSize) {
     return null;
   }
 
-  void* result = allocator::realloc(allocator::heap(), pointer, newSize);
+  void* result = allocator::realloc(allocator::mem, pointer, newSize);
 
   return result;
 }
@@ -207,7 +207,7 @@ fn void freeObject(Obj* object) {
       ObjClass* klass = (ObjClass*)object;
       table::freeTable(&klass.methods);
       ofree(ObjClass, object);
-    } 
+    }
     case OBJ_CLOSURE: {
       ObjClosure* closure = (ObjClosure*)object;
       free_array(ObjUpvalue*, closure.upvalues, closure.upvalueCount);

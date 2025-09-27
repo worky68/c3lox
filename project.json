@@ -1,18 +1,18 @@
 {
   // Language version of C3.
-  "langrev": "0.7.0",
+  "langrev": "0.7.5",
   // Warnings used for all targets.
-  "warnings": [ "no-unused", "all", "error", "extra" ],
+  "warnings": ["no-unused", "all", "error", "extra"],
   // Directories where C3 library files may be found.
-  "dependency-search-paths": [ "lib" ],
+  "dependency-search-paths": ["lib"],
   // Libraries to use for all targets.
-  "dependencies": [ ],
+  "dependencies": [],
   // Authors, optionally with email.
-  "authors": [ "Drew Workman" ],
+  "authors": ["Drew Workman"],
   // Version using semantic versioning.
   "version": "1.0.0",
   // Sources compiled for all targets.
-  "sources": [ "src/**", "test/**" ],
+  "sources": ["src/**", "test/**"],
   // C sources if the project also compiles C sources
   // relative to the project file.
   // "c-sources": [ "csource/**" ],
@@ -31,7 +31,6 @@
       "opt": "O3",
       "debug-info": "none",
       "features": [] // Add "NAN_BOXING" enable NAN Boxing optimization
-
     },
     "loxd": {
       // Executable or library.
@@ -41,12 +40,12 @@
       "opt": "O0",
       "debug-info": "full",
       "features": ["DEBUG_PRINT_CODE", "DEBUG_TRACE_EXECUTION"] // "DEBUG_PRINT_CODE", "DEBUG_TRACE_EXECUTION", "DEBUG_LOG_GC", "DEBUG_STRESS_GC"
-    },
+    }
   },
   // Global settings.
   // CPU name, used for optimizations in the LLVM backend.
   "cpu": "generic",
   // Optimization: "O0", "O1", "O2", "O3", "O4", "O5", "Os", "Oz".
-  "opt": "O3",
+  "opt": "O3"
   // See resources/examples/project_all_settings.json and 'c3c --list-project-properties' to see more properties.
 }

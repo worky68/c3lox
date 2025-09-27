@@ -33,7 +33,7 @@ enum Precedence {
   PREC_PRIMARY
 }
 
-alias ParseFn = fn void(bool canAssign); 
+alias ParseFn = fn void(bool canAssign);
 
 struct ParseRule {
   ParseFn prefix;
@@ -310,7 +310,7 @@ fn void grouping(bool canAssign) {
 }
 
 fn void number(bool canAssign) {
-  double value = libc::strtod(parser.previous.value, null);
+  double value = parser.previous.value.to_double()!!;
   emitConstant(value::number_val(value));
 }
 
@@ -497,7 +497,7 @@ fn void declareVariable() {
   for (int i = current.localCount - 1; i >= 0; i--) {
     Local* local = &current.locals[i];
     if (local.depth != -1 && local.depth < current.scopeDepth) {
-      break; 
+      break;
     }
 
     if (identifiersEqual(name, &local.name)) {
@@ -572,7 +572,7 @@ fn ParseRule* getRule(TokenType type) {
 ParseRule[*] rules = {
   [TokenType.TOKEN_LEFT_PAREN]    = {&grouping, &call,    PREC_CALL},
   [TokenType.TOKEN_RIGHT_PAREN]   = {null,      null,     PREC_NONE},
-  [TokenType.TOKEN_LEFT_BRACE]    = {null,      null,     PREC_NONE}, 
+  [TokenType.TOKEN_LEFT_BRACE]    = {null,      null,     PREC_NONE},
   [TokenType.TOKEN_RIGHT_BRACE]   = {null,      null,     PREC_NONE},
   [TokenType.TOKEN_COMMA]         = {null,      null,     PREC_NONE},
   [TokenType.TOKEN_DOT]           = {null,      &dot,     PREC_CALL},
@@ -626,7 +626,7 @@ fn void block() {
 fn void function(FunctionType type) {
   Compiler compiler;
   initCompiler(&compiler, type);
-  beginScope(); 
+  beginScope();
 
   consume(TokenType.TOKEN_LEFT_PAREN, "Expect '(' after function name.");
   if (!check(TokenType.TOKEN_RIGHT_PAREN)) {
@@ -784,7 +784,7 @@ fn void forStatement() {
 fn void ifStatement() {
   consume(TokenType.TOKEN_LEFT_PAREN, "Expect '(' after 'if'.");
   expression();
-  consume(TokenType.TOKEN_RIGHT_PAREN, "Expect ')' after condition."); 
+  consume(TokenType.TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
 
   int thenJump = emitJump(OpCode.OP_JUMP_IF_FALSE);
   emitByte(OpCode.OP_POP);
@@ -816,7 +816,7 @@ fn void returnStatement() {
     if (current.type == TYPE_INITIALIZER) {
       error("Can't return a value from an initializer.");
     }
-    
+
     expression();
     consume(TokenType.TOKEN_SEMICOLON, "Expect ';' after return value.");
     emitByte(OpCode.OP_RETURN);
@@ -899,7 +899,7 @@ fn ObjFunction* compile(String source) {
   scanner::initScanner(source);
   Compiler compiler;
   initCompiler(&compiler, TYPE_SCRIPT);
-  
+
   parser.hadError = false;
   parser.panicMode = false;
 

@@ -80,7 +80,7 @@ fn void resetStack() {
 
 fn void runtimeError(String format, args...) {
   io::fprintfn(io::stderr(), format, ...args)!!;
-  
+
   for (int i = vm.frameCount - 1; i >= 0; i--) {
     CallFrame* frame = &vm.frames[i];
     ObjFunction* function = frame.closure.function;
@@ -162,7 +162,7 @@ fn bool callValue(Value callee, int argCount) {
       case OBJ_NATIVE: {
         NativeFn native = object::as_native(callee);
         Value result = native(argCount, vm.stackTop - argCount);
-        vm.stackTop -= argCount + 1;
+        vm.stackTop -= (isz) argCount + 1;
         push(result);
         return true;
       }
@@ -322,7 +322,7 @@ fn void? run() {
       case OP_SET_GLOBAL: {
         ObjString* name = read_string(frame);
         if (table::tableSet(&vm.globals, name, peek(0))) {
-          table::tableDelete(&vm.globals, name); 
+          table::tableDelete(&vm.globals, name);
           runtimeError("Undefined variable '%s'.", name.chars);
           return RUNTIME_ERROR?;
         }
@@ -467,7 +467,7 @@ fn void? run() {
         push(value::obj_val(object::newClass(read_string(frame))));
       case OP_INHERIT: {
         Value superclass = peek(1);
-        
+
         if (!object::is_class(superclass)) {
           runtimeError("Superclass must be a class.");
           return RUNTIME_ERROR?;
