@@ -1,6 +1,7 @@
 module memory;
 
-import std::core::mem::allocator;
+import std::core::mem::allocators;
+import std::core::mem::alloc;
 import std::io;
 import libc;
 
@@ -14,11 +15,11 @@ import compiler;
 const GC_HEAP_GROW_FACTOR = 2;
 
 macro allocate($Type, count) {
-  return ($Type*) reallocate(null, 0, $Type.sizeof * count);
+  return ($Type*) reallocate(null, 0, $Type::size * (usz) count);
 }
 
 macro ofree($Type, pointer) {
-  return reallocate(pointer, $Type.sizeof, 0);
+  return reallocate(pointer, $Type::size, 0);
 }
 
 macro int grow_capacity(capacity) {
@@ -26,11 +27,11 @@ macro int grow_capacity(capacity) {
 }
 
 macro grow_array($Type, pointer, oldCount, newCount) {
-  return ($Type*) reallocate(pointer, $Type.sizeof * oldCount, $Type.sizeof * newCount);
+  return ($Type*) reallocate(pointer, $Type::size * (usz) oldCount, $Type::size * (usz) newCount);
 }
 
 macro void free_array($Type, pointer, oldCount) {
-  reallocate(pointer, $Type.sizeof * oldCount, 0);
+  reallocate(pointer, $Type::size * (usz) oldCount, 0);
 }
 
 fn void* reallocate(void* pointer, usz oldSize, usz newSize) {
@@ -50,7 +51,7 @@ fn void* reallocate(void* pointer, usz oldSize, usz newSize) {
     return null;
   }
 
-  void* result = allocator::realloc(allocator::mem, pointer, newSize);
+  void* result = alloc::realloc(mem, pointer, (sz) newSize);
 
   return result;
 }
@@ -189,7 +190,7 @@ fn void markObject(Obj* object) {
 
   if (vm::vm.grayCapacity < vm::vm.grayCount + 1) {
     vm::vm.grayCapacity = grow_capacity(vm::vm.grayCapacity);
-    vm::vm.grayStack = (Obj**)realloc(vm::vm.grayStack, Obj*.sizeof * vm::vm.grayCapacity);
+    vm::vm.grayStack = (Obj**)realloc(vm::vm.grayStack, Obj*::size * vm::vm.grayCapacity);
   }
 
   vm::vm.grayStack[vm::vm.grayCount++] = object;

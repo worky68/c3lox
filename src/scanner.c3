@@ -14,7 +14,7 @@ struct Token {
   int line;
 }
 
-enum TokenType : inline char {
+enum TokenType : char {
   // Single-character tokens.
   TOKEN_LEFT_PAREN, TOKEN_RIGHT_PAREN,
   TOKEN_LEFT_BRACE, TOKEN_RIGHT_BRACE,
@@ -124,7 +124,7 @@ fn void skipWhitespace() {
 
 fn TokenType checkKeyword(int start, int length, String rest, TokenType type) {
   if (scanner.current - scanner.start == (long)start + length &&
-      libc::memcmp(scanner.start + start, rest, length) == 0) {
+      libc::memcmp(scanner.start + start, rest, (usz) length) == 0) {
     return type;
   }
 

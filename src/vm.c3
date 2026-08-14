@@ -162,7 +162,7 @@ fn bool callValue(Value callee, int argCount) {
       case OBJ_NATIVE: {
         NativeFn native = object::as_native(callee);
         Value result = native(argCount, vm.stackTop - argCount);
-        vm.stackTop -= (isz) argCount + 1;
+        vm.stackTop -= (sz) argCount + 1;
         push(result);
         return true;
       }
@@ -264,8 +264,8 @@ fn void concatenate() {
 
   int length = a.length + b.length;
   char* chars = memory::allocate(char, length + 1);
-  libc::memcpy(chars, a.chars, a.length);
-  libc::memcpy(chars + a.length, b.chars, b.length);
+  libc::memcpy(chars, a.chars, (usz) a.length);
+  libc::memcpy(chars + a.length, b.chars, (usz) b.length);
   chars[length] = '\0';
 
   ObjString* result = object::takeString(chars, length);
@@ -310,7 +310,7 @@ fn void? run() {
         Value value;
         if (!table::tableGet(&vm.globals, name, &value)) {
           runtimeError("Undefined variable '%s'.", name.chars);
-          return RUNTIME_ERROR?;
+          return RUNTIME_ERROR~;
         }
         push(value);
       }
@@ -324,7 +324,7 @@ fn void? run() {
         if (table::tableSet(&vm.globals, name, peek(0))) {
           table::tableDelete(&vm.globals, name);
           runtimeError("Undefined variable '%s'.", name.chars);
-          return RUNTIME_ERROR?;
+          return RUNTIME_ERROR~;
         }
       }
       case OP_GET_UPVALUE: {
@@ -340,7 +340,7 @@ fn void? run() {
       case OP_GET_PROPERTY: {
         if (!object::is_instance(peek(0))) {
           runtimeError("Only instances have properties.");
-          return RUNTIME_ERROR?;
+          return RUNTIME_ERROR~;
         }
 
         ObjInstance* instance = object::as_instance(peek(0));
@@ -354,13 +354,13 @@ fn void? run() {
         }
 
         if (!bindMethod(instance.klass, name)) {
-          return RUNTIME_ERROR?;
+          return RUNTIME_ERROR~;
         }
       }
       case OP_SET_PROPERTY: {
         if (!object::is_instance(peek(1))) {
           runtimeError("Only instances have fields.");
-          return RUNTIME_ERROR?;
+          return RUNTIME_ERROR~;
         }
 
         ObjInstance* instance = object::as_instance(peek(1));
@@ -374,7 +374,7 @@ fn void? run() {
         ObjClass* superclass = object::as_class(pop());
 
         if (!bindMethod(superclass, name)) {
-          return RUNTIME_ERROR?;
+          return RUNTIME_ERROR~;
         }
       }
       case OP_EQUAL: {
@@ -392,7 +392,7 @@ fn void? run() {
           @binary_op(value::number_val, add)!;
         } else {
           runtimeError("Operands must be two numbers or two strings.");
-          return RUNTIME_ERROR?;
+          return RUNTIME_ERROR~;
         }
       }
       case OP_SUBTRACT: @binary_op(value::number_val, sub)!;
@@ -402,7 +402,7 @@ fn void? run() {
       case OP_NEGATE: {
         if(!value::is_number(peek(0))) {
           runtimeError("Operand must be a number.");
-          return RUNTIME_ERROR?;
+          return RUNTIME_ERROR~;
         }
         push(value::number_val(-value::as_number(pop())));
       }
@@ -425,7 +425,7 @@ fn void? run() {
       case OP_CALL: {
         int argCount = read_byte(frame);
         if (!callValue(peek(argCount), argCount)) {
-          return RUNTIME_ERROR?;
+          return RUNTIME_ERROR~;
         }
         frame = &vm.frames[vm.frameCount - 1];
       }
@@ -433,7 +433,7 @@ fn void? run() {
         ObjString* method = read_string(frame);
         int argCount = read_byte(frame);
         if (!invoke(method, argCount)) {
-          return RUNTIME_ERROR?;
+          return RUNTIME_ERROR~;
         }
         frame = &vm.frames[vm.frameCount - 1];
       }
@@ -442,7 +442,7 @@ fn void? run() {
         int argCount = read_byte(frame);
         ObjClass* superclass = object::as_class(pop());
         if (!invokeFromClass(superclass, method, argCount)) {
-          return RUNTIME_ERROR?;
+          return RUNTIME_ERROR~;
         }
         frame = &vm.frames[vm.frameCount - 1];
       }
@@ -470,7 +470,7 @@ fn void? run() {
 
         if (!object::is_class(superclass)) {
           runtimeError("Superclass must be a class.");
-          return RUNTIME_ERROR?;
+          return RUNTIME_ERROR~;
         }
 
         ObjClass* subclass = object::as_class(peek(0));
@@ -499,7 +499,7 @@ fn void? run() {
 fn void? interpret(String source) {
 
   ObjFunction* function = compiler::compile(source);
-  if (function == null) return COMPILE_ERROR?;
+  if (function == null) return COMPILE_ERROR~;
 
   push(value::obj_val(function));
   ObjClosure* closure = object::newClosure(function);
@@ -531,7 +531,7 @@ macro read_string(frame) {
 macro void? @binary_op(#as_value, #op) {
   if (!value::is_number(peek(0)) || !value::is_number(peek(1))) {
     runtimeError("Operands must be numbers.");
-    return RUNTIME_ERROR?;
+    return RUNTIME_ERROR~;
   }
   double b = value::as_number(pop());
   double a = value::as_number(pop());

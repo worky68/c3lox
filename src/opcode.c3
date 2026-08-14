@@ -2,9 +2,9 @@ module opcode;
 
 import chunk;
 
-macro from(char byte) => OpCode.from_ordinal(byte);
+macro from(char byte) => (OpCode) byte;
 
-enum OpCode : inline char {
+constdef OpCode : inline char @constinit {
   OP_CONSTANT,
   OP_NIL,
   OP_TRUE,

@@ -34,7 +34,7 @@ fn void freeTable(Table* table) {
 }
 
 fn Entry* findEntry(Entry* entries, int capacity, ObjString* key) {
-  uint index = key.hash & (capacity - 1);
+  uint index = key.hash & ((uint)capacity - 1);
   Entry* tombstone = null;
   for (;;) {
     Entry* entry = &entries[index];
@@ -50,7 +50,7 @@ fn Entry* findEntry(Entry* entries, int capacity, ObjString* key) {
       // We found the key.
       return entry;
     }
-    index = (index + 1) & (capacity - 1);
+    index = (index + 1) & ((uint) capacity - 1);
   }
 }
 
@@ -126,19 +126,19 @@ fn void tableAddAll(Table* from, Table* to) {
 fn ObjString* tableFindString(Table* table, char* chars, int length, uint hash) {
   if (table.count == 0) return null;
 
-  uint index = hash & (table.capacity - 1);
+  uint index = hash & ((uint) table.capacity - 1);
   for (;;) {
     Entry* entry = &table.entries[index];
     if (entry.key == null) {
       // Stop if we find an empty non-tombstone entry.
       if (value::is_nil(entry.value)) return null;
     } else if (entry.key.length == length &&
-        entry.key.hash == hash && libc::memcmp(entry.key.chars, chars, length) == 0) {
+        entry.key.hash == hash && libc::memcmp(entry.key.chars, chars, (usz) length) == 0) {
       // We found it.
       return entry.key;
     }
 
-    index = (index + 1) & (table.capacity - 1);
+    index = (index + 1) & ((uint) table.capacity - 1);
   }
 }
 

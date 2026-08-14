@@ -98,13 +98,13 @@ macro is_obj(value) {
 
 fn Value numToValue(double num) {
   Value value;
-  libc::memcpy(&value, &num, double.sizeof);
+  libc::memcpy(&value, &num, double::size);
   return value;
 }
 
 fn double valueToNum(Value value) {
   double num;
-  libc::memcpy(&num, &value, Value.sizeof);
+  libc::memcpy(&num, &value, Value::size);
   return num;
 }
 

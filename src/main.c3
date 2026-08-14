@@ -3,7 +3,7 @@ module lox;
 import std::io;
 import std::core::mem;
 import libc;
-
+import libc::os;
 import vm;
 
 fn void? repl() {
@@ -54,20 +54,22 @@ fn int runFile(String file) {
 fn String? readFile(String filename) {
 
   if(!file::is_file(filename)) {
-    libc::errno_set(errno::EISDIR);
-    return io::FILE_IS_DIR?;
+    libc::errno_set(Errno.EISDIR);
+    return io::FILE_IS_DIR~;
   }
 
   File file = file::open(filename, "rb")!;
   defer (void)file.close();
-  usz len = file.seek(0, END)! + 1;
-  file.seek(0, SET)!;
-  char* data = allocator::malloc_try(allocator::tmem, len)!;
-  defer catch allocator::free(allocator::tmem, data);
+
+  file.seek(0, SeekOrigin.FROM_END)!;
+  usz len = (usz) file.cursor()! + 1;
+  file.seek(0)!;
+  char* data = alloc::malloc_try(tmem, (sz) len)!;
+  defer catch alloc::free(tmem, data);
   usz read = 0;
   while (read < len - 1)
   {
-    read += file.read(data[read:len - read])!;
+    read += (usz) file.read(data[read:len - read])!;
   }
   data[len - 1] = '\0';
   return (String) data[:len];

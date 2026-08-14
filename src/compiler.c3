@@ -19,7 +19,7 @@ struct Parser {
   bool panicMode;
 }
 
-enum Precedence {
+constdef Precedence : inline int {
   PREC_NONE,
   PREC_ASSIGNMENT,  // =
   PREC_OR,          // or
@@ -422,7 +422,7 @@ fn char identifierConstant(Token* name) {
 
 fn bool identifiersEqual(Token* a, Token* b) {
   if (a.length != b.length) return false;
-  return libc::memcmp(a.value, b.value, a.length) == 0;
+  return libc::memcmp(a.value, b.value, (usz) a.length) == 0;
 }
 
 fn int resolveLocal(Compiler* compiler, Token* name) {

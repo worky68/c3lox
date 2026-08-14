@@ -1,6 +1,6 @@
 {
   // Language version of C3.
-  "langrev": "0.7.5",
+  "langrev": "0.8.2",
   // Warnings used for all targets.
   "warnings": ["no-unused", "all", "error", "extra"],
   // Directories where C3 library files may be found.
@@ -30,7 +30,7 @@
       // and overrides of global settings here.
       "opt": "O3",
       "debug-info": "none",
-      "features": [] // Add "NAN_BOXING" enable NAN Boxing optimization
+      "features": ["NAN_BOXING"] // Add "NAN_BOXING" enable NAN Boxing optimization
     },
     "loxd": {
       // Executable or library.

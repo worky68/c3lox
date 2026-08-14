@@ -193,7 +193,7 @@ fn ObjString* copyString(char* chars, int length) {
   if (interned != null) return interned;
 
   char* heapChars = memory::allocate(char, length + 1);
-  libc::memcpy(heapChars, chars, length);
+  libc::memcpy(heapChars, chars, (usz) length);
   heapChars[length] = '\0';
   return allocateString(heapChars, length, hash);
 }
@@ -228,7 +228,7 @@ fn void printObject(Value value) {
 }
 
 macro allocate_obj($Type, objectType) {
-  return ($Type*) allocateObject($Type.sizeof, objectType);
+  return ($Type*) allocateObject($Type::size, objectType);
 }
 
 macro obj_type(value) {
